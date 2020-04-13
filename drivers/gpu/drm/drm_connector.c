@@ -929,6 +929,12 @@ static const struct drm_prop_enum_list dp_colorspaces[] = {
 	{ DRM_MODE_COLORIMETRY_BT2020_YCC, "BT2020_YCC" },
 };
 
+static const struct drm_prop_enum_list rgb_quantization_range_options[] = {
+	{ DRM_MODE_RGB_QUANTIZATION_RANGE_AUTOMATIC, "Automatic" },
+	{ DRM_MODE_RGB_QUANTIZATION_RANGE_LIMITED, "Limited" },
+	{ DRM_MODE_RGB_QUANTIZATION_RANGE_FULL, "Full" },
+};
+
 /**
  * DOC: standard connector properties
  *
@@ -1803,6 +1809,35 @@ int drm_mode_create_dp_colorspace_property(struct drm_connector *connector)
 	return 0;
 }
 EXPORT_SYMBOL(drm_mode_create_dp_colorspace_property);
+
+/**
+ * drm_mode_create_rgb_quantization_range_property - create RGB quantization
+ * range property
+ * @dev: device to create the RGB quantization range property on.
+ *
+ * Called by a driver the first time it's needed, must be attached to connectors
+ * of CEA-861-compliant sinks.
+ *
+ * Returns:
+ * Zero on success, negative errno on failure.
+ */
+int drm_mode_create_rgb_quantization_range_property(struct drm_device *dev)
+{
+	if (dev->mode_config.rgb_quantization_range_property)
+		return 0;
+
+	dev->mode_config.rgb_quantization_range_property =
+		drm_property_create_enum(dev, DRM_MODE_PROP_ENUM,
+					 "RGB quantization range",
+					 rgb_quantization_range_options,
+					 ARRAY_SIZE(rgb_quantization_range_options));
+
+	if (!dev->mode_config.rgb_quantization_range_property)
+		return -ENOMEM;
+
+	return 0;
+}
+EXPORT_SYMBOL(drm_mode_create_rgb_quantization_range_property);
 
 /**
  * drm_mode_create_content_type_property - create content type property

@@ -304,6 +304,22 @@ struct drm_monitor_range_info {
 #define DRM_MODE_COLORIMETRY_BT601_YCC			15
 
 /**
+ * enum drm_rgb_quantization_range - rgb_quantization_range property value
+ *
+ * This enum lists the possible options for the rgb_quantization_range property.
+ *
+ * @DRM_MODE_RGB_QUANTIZATION_RANGE_AUTOMATIC:	Let the driver select the
+ * 						appropriate quantization range.
+ * @DRM_MODE_RGB_QUANTIZATION_RANGE_LIMITED:	Force limited range RGB.
+ * @DRM_MODE_RGB_QUANTIZATION_RANGE_FULL:	Force full range RGB.
+ */
+enum drm_rgb_quantization_range {
+	DRM_MODE_RGB_QUANTIZATION_RANGE_AUTOMATIC = 0,
+	DRM_MODE_RGB_QUANTIZATION_RANGE_LIMITED = 1,
+	DRM_MODE_RGB_QUANTIZATION_RANGE_FULL = 2,
+};
+
+/**
  * enum drm_bus_flags - bus_flags info for &drm_display_info
  *
  * This enum defines signal polarities and clock edge information for signals on
@@ -660,6 +676,12 @@ struct drm_connector_state {
 	 * to wider color gamuts like BT2020.
 	 */
 	u32 colorspace;
+
+	/**
+	 * @rgb_quantization_range: Connector property to control the selected
+	 * RGB quantization range for CEA-861 outputs.
+	 */
+	u32 rgb_quantization_range;
 
 	/**
 	 * @writeback_job: Writeback job for writeback connectors
@@ -1575,6 +1597,7 @@ int drm_mode_create_aspect_ratio_property(struct drm_device *dev);
 int drm_mode_create_hdmi_colorspace_property(struct drm_connector *connector);
 int drm_mode_create_dp_colorspace_property(struct drm_connector *connector);
 int drm_mode_create_content_type_property(struct drm_device *dev);
+int drm_mode_create_rgb_quantization_range_property(struct drm_device *dev);
 void drm_hdmi_avi_infoframe_content_type(struct hdmi_avi_infoframe *frame,
 					 const struct drm_connector_state *conn_state);
 

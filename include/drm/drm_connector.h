@@ -42,6 +42,7 @@ struct drm_property_blob;
 struct drm_printer;
 struct edid;
 struct i2c_adapter;
+struct drm_display_mode;
 
 enum drm_connector_force {
 	DRM_FORCE_UNSPECIFIED,
@@ -1621,6 +1622,9 @@ int drm_connector_set_panel_orientation_with_quirk(
 	int width, int height);
 int drm_connector_attach_max_bpc_property(struct drm_connector *connector,
 					  int min, int max);
+enum hdmi_quantization_range drm_connector_state_select_rgb_quantization_range(
+	const struct drm_connector_state *state,
+	const struct drm_display_mode *mode);
 
 /**
  * struct drm_tile_group - Tile group metadata

@@ -929,6 +929,12 @@ static const struct drm_prop_enum_list dp_colorspaces[] = {
 	{ DRM_MODE_COLORIMETRY_BT2020_YCC, "BT2020_YCC" },
 };
 
+static const struct drm_prop_enum_list broadcast_rgb_options[] = {
+	{ DRM_MODE_BROADCAST_RGB_AUTOMATIC, "Automatic" },
+	{ DRM_MODE_BROADCAST_RGB_FULL, "Full" },
+	{ DRM_MODE_BROADCAST_RGB_LIMITED, "Limited 16:235" },
+};
+
 /**
  * DOC: standard connector properties
  *
@@ -1186,6 +1192,34 @@ static const struct drm_prop_enum_list dp_colorspaces[] = {
  *	can also expose this property to external outputs, in which case they
  *	must support "None", which should be the default (since external screens
  *	have a built-in scaler).
+ *
+ * Broadcast RGB:
+ * 	This property allows userspace clients to override the RGB quantization
+ * 	range used with CTA-861-compliant outputs.
+ *
+ * 	The value of this property can be one of the following:
+ *
+ * 	Automatic:
+ * 		The RGB quantization range is selected according to the
+ * 		recommendations set by CTA-861 (limited range for CE modes, full
+ * 		range for IT modes).
+ * 	Full:
+ * 		Use full range output in all cases (e.g., 0:255 in the 8 bpc
+ * 		case).
+ * 	Limited 16:235:
+ * 		Use limited range output in all cases. 16:235 is the limited
+ * 		range for 8 bpc outputs and is included in the option's name for
+ * 		historical reasons. For higher bpc values, this refers to the
+ * 		appropriate range regardless of the name.
+ *
+ * 	The primary purpose of this property is to allow users with displays
+ * 	that default to limited range output according to CTA-861 to force
+ * 	full range if deemed appropriate.
+ *
+ * 	Drivers should call drm_mode_attach_broadcast_rgb_property() upon
+ * 	initialization to attach this property a initialization. Then, to
+ * 	determine what range should be used for a given output, call
+ * 	drm_connector_state_select_rgb_quantization_range().
  */
 
 int drm_connector_create_standard_properties(struct drm_device *dev)
@@ -1803,6 +1837,37 @@ int drm_mode_create_dp_colorspace_property(struct drm_connector *connector)
 	return 0;
 }
 EXPORT_SYMBOL(drm_mode_create_dp_colorspace_property);
+
+/**
+ * drm_mode_attach_broadcast_rgb_property - attach Broadcast RGB property
+ * @connector: connector to attach the property to.
+ *
+ * Should be called by a driver for all connectors of CEA-861-compliant sinks.
+ *
+ * Returns:
+ * Zero on success, negative errno on failure.
+ */
+int drm_mode_attach_broadcast_rgb_property(struct drm_connector *connector)
+{
+	struct drm_device *dev = connector->dev;
+
+	if (!dev->mode_config.broadcast_rgb_property) {
+		dev->mode_config.broadcast_rgb_property =
+			drm_property_create_enum(dev, DRM_MODE_PROP_ENUM,
+			                         "Broadcast RGB", broadcast_rgb_options,
+			                         ARRAY_SIZE(broadcast_rgb_options));
+
+		if (!dev->mode_config.broadcast_rgb_property)
+			return -ENOMEM;
+	}
+
+	drm_object_attach_property(&connector->base,
+				   dev->mode_config.broadcast_rgb_property,
+				   DRM_MODE_BROADCAST_RGB_AUTOMATIC);
+
+	return 0;
+}
+EXPORT_SYMBOL(drm_mode_attach_broadcast_rgb_property);
 
 /**
  * drm_mode_create_content_type_property - create content type property

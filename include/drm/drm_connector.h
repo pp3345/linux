@@ -304,6 +304,22 @@ struct drm_monitor_range_info {
 #define DRM_MODE_COLORIMETRY_BT601_YCC			15
 
 /**
+ * enum drm_broadcast_rgb - broadcast_rgb property value
+ *
+ * This enum lists the possible options for the broadcast_rgb property.
+ *
+ * @DRM_MODE_BROADCAST_RGB_AUTOMATIC:	Let the driver select the
+ * 					appropriate quantization range.
+ * @DRM_MODE_BROADCAST_RGB_FULL:	Force full range RGB.
+ * @DRM_MODE_BROADCAST_RGB_LIMITED:	Force limited range RGB.
+ */
+enum drm_broadcast_rgb {
+	DRM_MODE_BROADCAST_RGB_AUTOMATIC = 0,
+	DRM_MODE_BROADCAST_RGB_FULL = 1,
+	DRM_MODE_BROADCAST_RGB_LIMITED = 2,
+};
+
+/**
  * enum drm_bus_flags - bus_flags info for &drm_display_info
  *
  * This enum defines signal polarities and clock edge information for signals on
@@ -660,6 +676,12 @@ struct drm_connector_state {
 	 * to wider color gamuts like BT2020.
 	 */
 	u32 colorspace;
+
+	/**
+	 * @broadcast_rgb: Connector property to control the selected RGB
+	 * quantization range for CEA-861 outputs.
+	 */
+	u32 broadcast_rgb;
 
 	/**
 	 * @writeback_job: Writeback job for writeback connectors
@@ -1575,6 +1597,7 @@ int drm_mode_create_aspect_ratio_property(struct drm_device *dev);
 int drm_mode_create_hdmi_colorspace_property(struct drm_connector *connector);
 int drm_mode_create_dp_colorspace_property(struct drm_connector *connector);
 int drm_mode_create_content_type_property(struct drm_device *dev);
+int drm_mode_attach_broadcast_rgb_property(struct drm_connector *connector);
 void drm_hdmi_avi_infoframe_content_type(struct hdmi_avi_infoframe *frame,
 					 const struct drm_connector_state *conn_state);
 

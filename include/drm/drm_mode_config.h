@@ -855,6 +855,12 @@ struct drm_mode_config {
 	 */
 	struct drm_property *hdcp_content_type_property;
 
+	/**
+	 * @broadcast_rgb_property: Connector property to allow user-space to
+	 * override the RGB quantization range for CEA-861 outputs.
+	 */
+	struct drm_property *broadcast_rgb_property;
+
 	/* dumb ioctl parameters */
 	uint32_t preferred_depth, prefer_shadow;
 

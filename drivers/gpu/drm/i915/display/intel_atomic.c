@@ -63,8 +63,6 @@ int intel_digital_connector_atomic_get_property(struct drm_connector *connector,
 
 	if (property == dev_priv->force_audio_property)
 		*val = intel_conn_state->force_audio;
-	else if (property == dev_priv->broadcast_rgb_property)
-		*val = intel_conn_state->broadcast_rgb;
 	else {
 		drm_dbg_atomic(&dev_priv->drm,
 			       "Unknown property [PROP:%d:%s]\n",
@@ -96,11 +94,6 @@ int intel_digital_connector_atomic_set_property(struct drm_connector *connector,
 
 	if (property == dev_priv->force_audio_property) {
 		intel_conn_state->force_audio = val;
-		return 0;
-	}
-
-	if (property == dev_priv->broadcast_rgb_property) {
-		intel_conn_state->broadcast_rgb = val;
 		return 0;
 	}
 
@@ -145,7 +138,6 @@ int intel_digital_connector_atomic_check(struct drm_connector *conn,
 	 * up in a modeset.
 	 */
 	if (new_conn_state->force_audio != old_conn_state->force_audio ||
-	    new_conn_state->broadcast_rgb != old_conn_state->broadcast_rgb ||
 	    new_conn_state->base.colorspace != old_conn_state->base.colorspace ||
 	    new_conn_state->base.picture_aspect_ratio != old_conn_state->base.picture_aspect_ratio ||
 	    new_conn_state->base.content_type != old_conn_state->base.content_type ||

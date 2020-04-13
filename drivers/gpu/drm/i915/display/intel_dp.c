@@ -2343,10 +2343,9 @@ intel_dp_ycbcr420_config(struct intel_dp *intel_dp,
 bool intel_dp_limited_color_range(const struct intel_crtc_state *crtc_state,
 				  const struct drm_connector_state *conn_state)
 {
-	const struct intel_digital_connector_state *intel_conn_state =
-		to_intel_digital_connector_state(conn_state);
 	const struct drm_display_mode *adjusted_mode =
 		&crtc_state->hw.adjusted_mode;
+	enum hdmi_quantization_range range;
 
 	/*
 	 * Our YCbCr output is always limited range.
@@ -2355,22 +2354,13 @@ bool intel_dp_limited_color_range(const struct intel_crtc_state *crtc_state,
 	 * some conflicting bits in PIPECONF which will mess up
 	 * the colors on the monitor.
 	 */
-	if (crtc_state->output_format != INTEL_OUTPUT_FORMAT_RGB)
+	if (crtc_state->output_format != INTEL_OUTPUT_FORMAT_RGB ||
+	    crtc_state->pipe_bpp == 18)
 		return false;
 
-	if (intel_conn_state->broadcast_rgb == INTEL_BROADCAST_RGB_AUTO) {
-		/*
-		 * See:
-		 * CEA-861-E - 5.1 Default Encoding Parameters
-		 * VESA DisplayPort Ver.1.2a - 5.1.1.1 Video Colorimetry
-		 */
-		return crtc_state->pipe_bpp != 18 &&
-			drm_default_rgb_quant_range(adjusted_mode) ==
-			HDMI_QUANTIZATION_RANGE_LIMITED;
-	} else {
-		return intel_conn_state->broadcast_rgb ==
-			INTEL_BROADCAST_RGB_LIMITED;
-	}
+	range = drm_connector_state_select_rgb_quantization_range(conn_state,
+								  adjusted_mode);
+	return range == HDMI_QUANTIZATION_RANGE_LIMITED;
 }
 
 static bool intel_dp_port_has_audio(struct drm_i915_private *dev_priv,
@@ -6844,7 +6834,7 @@ intel_dp_add_properties(struct intel_dp *intel_dp, struct drm_connector *connect
 	if (!IS_G4X(dev_priv) && port != PORT_A)
 		intel_attach_force_audio_property(connector);
 
-	intel_attach_broadcast_rgb_property(connector);
+	drm_mode_attach_broadcast_rgb_property(connector);
 	if (HAS_GMCH(dev_priv))
 		drm_connector_attach_max_bpc_property(connector, 6, 10);
 	else if (INTEL_GEN(dev_priv) >= 5)

@@ -1973,6 +1973,14 @@ void drm_mode_convert_to_umode(struct drm_mode_modeinfo *out,
 		break;
 	}
 
+	if (drm_match_cea_mode(in) > 1) {
+		/*
+		 * All modes in CTA-861-G Table 1 are CE modes, except 640x480p
+		 * (VIC 1).
+		 */
+		out->flags |= DRM_MODE_FLAG_CEA_861_CE_MODE;
+	}
+
 	strncpy(out->name, in->name, DRM_DISPLAY_MODE_LEN);
 	out->name[DRM_DISPLAY_MODE_LEN-1] = 0;
 }
@@ -2044,6 +2052,12 @@ int drm_mode_convert_umode(struct drm_device *dev,
 	default:
 		return -EINVAL;
 	}
+
+	/*
+	 * The CEA-861 CE mode flag is purely informational and intended for
+	 * userspace only.
+	 */
+	out->flags &= ~DRM_MODE_FLAG_CEA_861_CE_MODE;
 
 	out->status = drm_mode_validate_driver(dev, out);
 	if (out->status != MODE_OK)

@@ -2187,6 +2187,37 @@ int drm_connector_set_panel_orientation_with_quirk(
 }
 EXPORT_SYMBOL(drm_connector_set_panel_orientation_with_quirk);
 
+/**
+ * drm_connector_state_select_rgb_quantization_range - find RGB quantization
+ * range appropriate for a connector's state and mode
+ *
+ * @state: state of the connector for which to determine the range
+ * @mode: mode for which to determine the range
+ *
+ * For a given connector state (i.e., RGB quantization range property) and a
+ * given mode, determine which RGB quantization range should be used.
+ *
+ * Returns:
+ * A constant from the HDMI quantization range enum.
+ */
+enum hdmi_quantization_range drm_connector_state_select_rgb_quantization_range(
+	const struct drm_connector_state *state,
+        const struct drm_display_mode *mode)
+{
+	switch (state->rgb_quantization_range) {
+	default:
+		WARN_ON(1);
+		/* fallthrough */
+	case DRM_MODE_RGB_QUANTIZATION_RANGE_AUTOMATIC:
+		return drm_default_rgb_quant_range(mode);
+	case DRM_MODE_RGB_QUANTIZATION_RANGE_FULL:
+		return HDMI_QUANTIZATION_RANGE_FULL;
+	case DRM_MODE_RGB_QUANTIZATION_RANGE_LIMITED:
+		return HDMI_QUANTIZATION_RANGE_LIMITED;
+	}
+}
+EXPORT_SYMBOL(drm_connector_state_select_rgb_quantization_range);
+
 int drm_connector_set_obj_prop(struct drm_mode_object *obj,
 				    struct drm_property *property,
 				    uint64_t value)

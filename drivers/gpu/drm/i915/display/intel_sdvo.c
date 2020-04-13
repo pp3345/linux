@@ -1328,26 +1328,22 @@ static int intel_sdvo_compute_config(struct intel_encoder *encoder,
 	pipe_config->has_hdmi_sink = intel_has_hdmi_sink(intel_sdvo, conn_state);
 
 	if (pipe_config->has_hdmi_sink) {
+		enum hdmi_quantization_range range;
+
 		if (intel_sdvo_state->base.force_audio == HDMI_AUDIO_AUTO)
 			pipe_config->has_audio = intel_sdvo->has_hdmi_audio;
 		else
 			pipe_config->has_audio =
 				intel_sdvo_state->base.force_audio == HDMI_AUDIO_ON;
-	}
 
-	if (intel_sdvo_state->base.broadcast_rgb == INTEL_BROADCAST_RGB_AUTO) {
+		range = drm_connector_state_select_rgb_quantization_range(
+				conn_state, adjusted_mode);
+
 		/*
-		 * See CEA-861-E - 5.1 Default Encoding Parameters
-		 *
 		 * FIXME: This bit is only valid when using TMDS encoding and 8
 		 * bit per color mode.
 		 */
-		if (pipe_config->has_hdmi_sink &&
-		    drm_match_cea_mode(adjusted_mode) > 1)
-			pipe_config->limited_color_range = true;
-	} else {
-		if (pipe_config->has_hdmi_sink &&
-		    intel_sdvo_state->base.broadcast_rgb == INTEL_BROADCAST_RGB_LIMITED)
+		if (range == HDMI_QUANTIZATION_RANGE_LIMITED)
 			pipe_config->limited_color_range = true;
 	}
 
@@ -2662,7 +2658,7 @@ intel_sdvo_add_hdmi_properties(struct intel_sdvo *intel_sdvo,
 
 	intel_attach_force_audio_property(&connector->base.base);
 	if (INTEL_GEN(dev_priv) >= 4 && IS_MOBILE(dev_priv)) {
-		intel_attach_broadcast_rgb_property(&connector->base.base);
+		intel_attach_rgb_quantization_range_property(&connector->base.base);
 	}
 	intel_attach_aspect_ratio_property(&connector->base.base);
 }

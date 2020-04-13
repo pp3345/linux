@@ -730,7 +730,7 @@ static struct drm_connector *intel_dp_add_mst_connector(struct drm_dp_mst_topolo
 		goto err;
 
 	intel_attach_force_audio_property(connector);
-	intel_attach_broadcast_rgb_property(connector);
+	intel_attach_rgb_quantization_range_property(connector);
 
 	/*
 	 * Reuse the prop from the SST connector because we're

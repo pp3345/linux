@@ -2381,10 +2381,9 @@ static int intel_hdmi_compute_clock(struct intel_encoder *encoder,
 static bool intel_hdmi_limited_color_range(const struct intel_crtc_state *crtc_state,
 					   const struct drm_connector_state *conn_state)
 {
-	const struct intel_digital_connector_state *intel_conn_state =
-		to_intel_digital_connector_state(conn_state);
 	const struct drm_display_mode *adjusted_mode =
 		&crtc_state->hw.adjusted_mode;
+	enum hdmi_quantization_range range;
 
 	/*
 	 * Our YCbCr output is always limited range.
@@ -2393,17 +2392,13 @@ static bool intel_hdmi_limited_color_range(const struct intel_crtc_state *crtc_s
 	 * some conflicting bits in PIPECONF which will mess up
 	 * the colors on the monitor.
 	 */
-	if (crtc_state->output_format != INTEL_OUTPUT_FORMAT_RGB)
+	if (crtc_state->output_format != INTEL_OUTPUT_FORMAT_RGB ||
+	    !crtc_state->has_hdmi_sink)
 		return false;
 
-	if (intel_conn_state->broadcast_rgb == INTEL_BROADCAST_RGB_AUTO) {
-		/* See CEA-861-E - 5.1 Default Encoding Parameters */
-		return crtc_state->has_hdmi_sink &&
-			drm_default_rgb_quant_range(adjusted_mode) ==
-			HDMI_QUANTIZATION_RANGE_LIMITED;
-	} else {
-		return intel_conn_state->broadcast_rgb == INTEL_BROADCAST_RGB_LIMITED;
-	}
+	range = drm_connector_state_select_rgb_quantization_range(conn_state,
+								  adjusted_mode);
+	return range == HDMI_QUANTIZATION_RANGE_LIMITED;
 }
 
 int intel_hdmi_compute_config(struct intel_encoder *encoder,
@@ -2867,7 +2862,7 @@ intel_hdmi_add_properties(struct intel_hdmi *intel_hdmi, struct drm_connector *c
 				hdmi_to_dig_port(intel_hdmi);
 
 	intel_attach_force_audio_property(connector);
-	intel_attach_broadcast_rgb_property(connector);
+	intel_attach_rgb_quantization_range_property(connector);
 	intel_attach_aspect_ratio_property(connector);
 
 	/*

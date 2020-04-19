@@ -481,36 +481,6 @@ void cdv_intel_attach_force_audio_property(struct drm_connector *connector)
 	drm_object_attach_property(&connector->base, prop, 0);
 }
 
-
-static const char *broadcast_rgb_names[] = {
-	"Full",
-	"Limited 16:235",
-};
-
-void cdv_intel_attach_broadcast_rgb_property(struct drm_connector *connector)
-{
-	struct drm_device *dev = connector->dev;
-	struct drm_psb_private *dev_priv = dev->dev_private;
-	struct drm_property *prop;
-	int i;
-
-	prop = dev_priv->broadcast_rgb_property;
-	if (prop == NULL) {
-		prop = drm_property_create(dev, DRM_MODE_PROP_ENUM,
-					   "Broadcast RGB",
-					   ARRAY_SIZE(broadcast_rgb_names));
-		if (prop == NULL)
-			return;
-
-		for (i = 0; i < ARRAY_SIZE(broadcast_rgb_names); i++)
-			drm_property_add_enum(prop, i, broadcast_rgb_names[i]);
-
-		dev_priv->broadcast_rgb_property = prop;
-	}
-
-	drm_object_attach_property(&connector->base, prop, 0);
-}
-
 /* Cedarview */
 static const struct psb_offset cdv_regmap[2] = {
 	{

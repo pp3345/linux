@@ -94,12 +94,6 @@ struct psb_intel_sdvo {
 	uint16_t attached_output;
 
 	/**
-	 * This is used to select the color range of RBG outputs in HDMI mode.
-	 * It is only valid when using TMDS encoding and 8 bit per color mode.
-	 */
-	uint32_t color_range;
-
-	/**
 	 * This is set if we're going to treat the device as TV-out.
 	 *
 	 * While we have these nice friendly flags for output types that ought
@@ -1695,14 +1689,6 @@ psb_intel_sdvo_set_property(struct drm_connector *connector,
 			return 0;
 
 		psb_intel_sdvo->has_hdmi_audio = has_audio;
-		goto done;
-	}
-
-	if (property == dev_priv->broadcast_rgb_property) {
-		if (val == !!psb_intel_sdvo->color_range)
-			return 0;
-
-		psb_intel_sdvo->color_range = val ? SDVO_COLOR_RANGE_16_235 : 0;
 		goto done;
 	}
 

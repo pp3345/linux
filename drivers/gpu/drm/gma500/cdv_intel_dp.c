@@ -1045,9 +1045,12 @@ cdv_intel_dp_mode_set(struct drm_encoder *encoder, struct drm_display_mode *mode
 	struct gma_crtc *gma_crtc = to_gma_crtc(crtc);
 	struct cdv_intel_dp *intel_dp = intel_encoder->dev_priv;
 	struct drm_device *dev = encoder->dev;
+	struct drm_connector *connector = &intel_dp->connector->base;
 
 	intel_dp->DP = DP_VOLTAGE_0_4 | DP_PRE_EMPHASIS_0;
-	intel_dp->DP |= intel_dp->color_range;
+	if (drm_connector_state_select_rgb_quantization_range(connector->state,
+				adjusted_mode) == HDMI_QUANTIZATION_RANGE_LIMITED)
+		intel_dp->DP |= DP_COLOR_RANGE_16_235;
 
 	if (adjusted_mode->flags & DRM_MODE_FLAG_PHSYNC)
 		intel_dp->DP |= DP_SYNC_HS_HIGH;
@@ -1871,14 +1874,6 @@ cdv_intel_dp_set_property(struct drm_connector *connector,
 		goto done;
 	}
 
-	if (property == dev_priv->broadcast_rgb_property) {
-		if (val == !!intel_dp->color_range)
-			return 0;
-
-		intel_dp->color_range = val ? DP_COLOR_RANGE_16_235 : 0;
-		goto done;
-	}
-
 	return -EINVAL;
 
 done:
@@ -1944,7 +1939,7 @@ static const struct drm_encoder_funcs cdv_intel_dp_enc_funcs = {
 static void cdv_intel_dp_add_properties(struct drm_connector *connector)
 {
 	cdv_intel_attach_force_audio_property(connector);
-	cdv_intel_attach_broadcast_rgb_property(connector);
+	drm_mode_attach_broadcast_rgb_property(connector);
 }
 
 /* check the VBT to see whether the eDP is on DP-D port */

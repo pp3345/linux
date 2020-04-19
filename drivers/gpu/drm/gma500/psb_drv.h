@@ -505,7 +505,6 @@ struct drm_psb_private {
 		  pretend there are no mappings available */
 	struct sdvo_device_mapping sdvo_mappings[2];
 	u32 hotplug_supported_mask;
-	struct drm_property *broadcast_rgb_property;
 	struct drm_property *force_audio_property;
 
 	/* LVDS info */

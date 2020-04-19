@@ -265,6 +265,7 @@ struct cdv_intel_dp {
 	uint8_t lane_count;
 	uint8_t dpcd[4];
 	struct gma_encoder *encoder;
+	struct gma_connector *connector;
 	struct i2c_adapter adapter;
 	struct i2c_algo_dp_aux_data algo;
 	uint8_t	train_set[4];
@@ -2029,6 +2030,7 @@ cdv_intel_dp_init(struct drm_device *dev, struct psb_intel_mode_device *mode_dev
 
 	gma_encoder->dev_priv=intel_dp;
 	intel_dp->encoder = gma_encoder;
+	intel_dp->connector = gma_connector;
 	intel_dp->output_reg = output_reg;
 	
 	drm_encoder_helper_add(encoder, &cdv_intel_dp_helper_funcs);
